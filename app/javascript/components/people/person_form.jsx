@@ -1,4 +1,6 @@
 import React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import AppLink from '../common/app_link'
 
 /*
     There are three ways to render the PersonForm.
@@ -14,12 +16,16 @@ class PersonForm extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            person: props.person ? props.person : this.getBlankPerson(),
+            person: props.person ? JSON.parse(JSON.stringify(props.person)) : this.getBlankPerson(),
+            original_person: props.person ? JSON.parse(JSON.stringify(props.person)) : this.getBlankPerson(),
             person_id: props.id,
             warnings: {},
             status: (props.person && !props.id) ? "ready" : "loading"
         }
         this.changeValue = this.changeValue.bind(this);
+        this.delete = this.delete.bind(this);
+        this.cancel = this.cancel.bind(this);
+        this.reset = this.reset.bind(this);
     }
 
     componentDidMount(){
@@ -37,14 +43,14 @@ class PersonForm extends React.Component {
                     'X-CSRF-Token': this.csrf_token
                 },
                 success:(data)=>{
-                    this.setState({person: data, status: "ready"});
+                    this.setState({person: JSON.parse(JSON.stringify(data)), original_person: JSON.parse(JSON.stringify(data)), status: "ready"});
                 }
             });
         }
     }
 
     getBlankPerson(){
-        return {name: "", description: "", wikipedia_link: "", is_living: false};
+        return {name: "", description: "", wikipedia_link: "", approved: false};
     }
  
     getWarning(input_id){
@@ -81,6 +87,34 @@ class PersonForm extends React.Component {
         let temp = {...this.state.person}
         temp[event.target.id] = event.target.value;
         this.setState({person: temp});
+    }
+
+    reset(event){
+        event.preventDefault();
+        this.setState({person: JSON.parse(JSON.stringify(this.state.original_person))});
+    }
+
+    cancel(){
+        event.preventDefault();
+        window.app_vars.app_history.goBack();
+    }
+
+    delete(){
+        event.preventDefault();
+        if(this.state.person.id){
+            $.ajax({
+                type: "delete",
+                url: `/app/people/${this.state.person.id}`, 
+                data: JSON.stringify({person: this.state.person}),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': window.app_vars.csrf_token
+                },
+                success:(data)=>{
+                    window.app_func.route('/people');
+                }
+            });
+        }
     }
 
     save(){
@@ -121,9 +155,20 @@ class PersonForm extends React.Component {
                 <form>
                     <div>
                         <div className="row">
-                            <div className="col-sm-12 col-md-6">
+                            <div className="col-sm-12 col-md-12">
                                 <h2>
                                     {(this.state.person && this.state.person.id) ? `Editing ${this.state.person.name}` : "New Person"}
+                                    {this.state.person.id && <AppLink path="" onClick={this.delete} style={{float: "right", color: "red"}}>
+                                        <FontAwesomeIcon icon="trash"/>
+                                    </AppLink>}
+                                    <span style={{float: "right"}}>{'\u00A0'}</span>
+                                    <AppLink path="" onClick={this.cancel} style={{float: "right"}}>
+                                        <FontAwesomeIcon icon="ban"/>
+                                    </AppLink>
+                                    <span style={{float: "right"}}>{'\u00A0'}</span>
+                                    <AppLink path="" onClick={this.reset} style={{float: "right"}}>
+                                        <FontAwesomeIcon icon="undo"/>
+                                    </AppLink>
                                 </h2>
                             </div>
                         </div>

@@ -30,7 +30,7 @@ module App
         end
     
         def person_params
-            params[:person].permit(:name, :description, :wikipedia_link)
+            params[:person].permit(:name, :description, :wikipedia_link, :approved)
         end
         
     end

@@ -19,16 +19,16 @@ ActiveRecord::Schema.define(version: 2019_05_30_042718) do
     t.string "name"
     t.text "description"
     t.string "wikipedia_link"
-    t.boolean "approved"
+    t.boolean "approved", default: false
   end
 
   create_table "publications", force: :cascade do |t|
     t.string "title"
     t.text "description"
     t.string "wikipedia_link"
-    t.json "citation_fields", default: "[]"
+    t.jsonb "citation_fields", default: []
     t.boolean "is_translated"
-    t.boolean "approved"
+    t.boolean "approved", default: false
     t.bigint "person_id"
     t.index ["person_id"], name: "index_publications_on_person_id"
   end
@@ -36,7 +36,7 @@ ActiveRecord::Schema.define(version: 2019_05_30_042718) do
   create_table "quote_texts", force: :cascade do |t|
     t.text "text"
     t.integer "length"
-    t.boolean "approved"
+    t.boolean "approved", default: false
     t.bigint "translation_id"
     t.bigint "quote_id"
     t.index ["quote_id"], name: "index_quote_texts_on_quote_id"
@@ -45,10 +45,10 @@ ActiveRecord::Schema.define(version: 2019_05_30_042718) do
 
   create_table "quotes", force: :cascade do |t|
     t.text "key_words"
-    t.integer "rating_count"
-    t.integer "rating"
-    t.json "citation", default: "{}"
-    t.boolean "approved"
+    t.integer "rating_count", default: 0
+    t.integer "rating", default: 0
+    t.jsonb "citation", default: {}
+    t.boolean "approved", default: false
     t.bigint "publication_id"
     t.bigint "person_id"
     t.index ["person_id"], name: "index_quotes_on_person_id"

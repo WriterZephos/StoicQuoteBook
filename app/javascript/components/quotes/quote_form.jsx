@@ -1,5 +1,6 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import AppLink from '../common/app_link'
 
 /*
     There are three ways to render the QuoteForm.
@@ -15,7 +16,8 @@ class QuoteForm extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            quote: props.quote ? props.quote : this.getBlankQuote(),
+            quote: props.quote ? JSON.parse(JSON.stringify(props.quote)) : this.getBlankQuote(),
+            original_quote: props.quote ? JSON.parse(JSON.stringify(props.quote)) : this.getBlankQuote(),
             quote_id: props.id,
             publications: [],
             people: [],
@@ -29,6 +31,9 @@ class QuoteForm extends React.Component {
 
         this.changeValue = this.changeValue.bind(this);
         this.save = this.save.bind(this);
+        this.delete = this.delete.bind(this);
+        this.cancel = this.cancel.bind(this);
+        this.reset = this.reset.bind(this);
         this.changeCitationValue = this.changeCitationValue.bind(this);
         this.changeQuoteTextValue = this.changeQuoteTextValue.bind(this);
         this.getPublications = this.getPublications.bind(this);
@@ -45,7 +50,7 @@ class QuoteForm extends React.Component {
         return {
             id: null,
             key_words: "",
-            citation: [],
+            citation: {},
             publication_id: "",
             person_id: "",
             quote_texts_attributes: [
@@ -54,7 +59,8 @@ class QuoteForm extends React.Component {
                     text: "",
                     translation_id: "" 
                 }
-            ]
+            ],
+            approved: false
         }
     }
 
@@ -164,7 +170,7 @@ class QuoteForm extends React.Component {
                     'Content-Type': 'application/json'
                 },
                 success:(data)=>{
-                    this.setState({quote: data, status: "ready"}, this.getPublications);
+                    this.setState({quote: JSON.parse(JSON.stringify(data)), original_quote: JSON.parse(JSON.stringify(data)), status: "ready"}, this.getPublications);
                 }
             });
         } else if(this.state.quote.id){
@@ -215,6 +221,34 @@ class QuoteForm extends React.Component {
         }
 
         this.setState({quote: temp, publications: temp_publications}, callback);
+    }
+
+    reset(event){
+        event.preventDefault();
+        this.setState({quote: JSON.parse(JSON.stringify(this.state.original_quote))});
+    }
+
+    cancel(){
+        event.preventDefault();
+        window.app_vars.app_history.goBack();
+    }
+
+    delete(){
+        event.preventDefault();
+        if(this.state.quote.id){
+            $.ajax({
+                type: "delete",
+                url: `/app/quotes/${this.state.quote.id}`, 
+                data: JSON.stringify({quote: this.state.quote}),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': window.app_vars.csrf_token
+                },
+                success:(data)=>{
+                    window.app_func.route('/quotes');
+                }
+            });
+        }
     }
 
     save(event){
@@ -381,9 +415,20 @@ class QuoteForm extends React.Component {
                 <form>
                     <div>
                         <div className="row">
-                            <div className="col-sm-12 col-md-6">
+                            <div className="col-sm-12 col-md-12">
                                 <h2>
                                     {(this.state.quote && this.state.quote.id) ? `Editing Quote by ${this.state.quote.person.name}` : "New Quote"}
+                                    {this.state.quote.id && <AppLink path="" onClick={this.delete} style={{float: "right", color: "red"}}>
+                                        <FontAwesomeIcon icon="trash"/>
+                                    </AppLink>}
+                                    <span style={{float: "right"}}>{'\u00A0'}</span>
+                                    <AppLink path="" onClick={this.cancel} style={{float: "right"}}>
+                                        <FontAwesomeIcon icon="ban"/>
+                                    </AppLink>
+                                    <span style={{float: "right"}}>{'\u00A0'}</span>
+                                    <AppLink path="" onClick={this.reset} style={{float: "right"}}>
+                                        <FontAwesomeIcon icon="undo"/>
+                                    </AppLink>
                                 </h2>
                             </div>
                         </div>

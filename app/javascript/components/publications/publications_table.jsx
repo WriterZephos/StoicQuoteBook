@@ -19,7 +19,7 @@ class PublicationsTable extends React.Component {
                             <AppLink
                                 path={"/publication"}
                                 text={p.title}
-                                state={{publication: p}}/>
+                                state={{publication: p, routing_options: {breadcrumb_name: `Publication: ${p.title}`}}}/>
                         </td>
                         <td>{p.person.name}</td>
                         <td>{p.description}</td>

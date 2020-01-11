@@ -114,7 +114,7 @@ class PublicationShow extends React.Component {
                     <div className="col-sm-12 col-md-12 mx-auto">
                         <h2>
                             {this.state.publication.title}{'\u00A0'}
-                            <AppLink path={"/publication_form"} state={{publication: this.state.publication}} style={{float: "right"}}>
+                            <AppLink path={"/publication_form"} state={{publication: this.state.publication, routing_options: {breadcrumb_name: `Edit ${this.state.publication.title}`}}} style={{float: "right"}}>
                                 <FontAwesomeIcon icon="edit"/>
                             </AppLink>
                         </h2>

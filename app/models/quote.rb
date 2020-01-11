@@ -1,7 +1,15 @@
 class Quote < ApplicationRecord
     belongs_to :person
     belongs_to :publication
-    has_many :quote_texts
+    has_many :quote_texts, dependent: :destroy
+
+    validates :person, presence: true
+    validates :publication, presence: true
+    validates :key_words, presence: true
+    validates :rating_count, presence: true
+    validates :rating, presence: true
+    validates :approved, inclusion: { in: [ true, false ] }
+    validates_uniqueness_of :publication, scope: :citation
 
     accepts_nested_attributes_for :quote_texts, allow_destroy: true, reject_if: :quote_text_invalid
 

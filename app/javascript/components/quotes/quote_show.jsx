@@ -95,7 +95,7 @@ class QuoteShow extends React.Component {
                     <div className="col-sm-12 col-md-12 mx-auto">
                         <h2>
                             {`Quote by ${this.state.quote.person.name}`}{'\u00A0'}
-                            <AppLink path={"/quote_form"} state={{quote: this.state.quote}} style={{float: "right"}}>
+                            <AppLink path={"/quote_form"} state={{quote: this.state.quote, routing_options: {breadcrumb_name: `Edit Quote by ${this.state.quote.person.name}`}}} style={{float: "right"}}>
                                 <FontAwesomeIcon icon="edit"/>
                             </AppLink>
                         </h2>

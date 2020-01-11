@@ -41,7 +41,7 @@ class QuotesIndex extends React.Component {
                     <h2>
                         Quotes{'\u00A0'}
                         <small>
-                            <AppLink path={"/quote_form"}>
+                            <AppLink path={"/quote_form"} state={{routing_options: {breadcrumb_name: `New Quote`}}}>
                                 <FontAwesomeIcon icon="plus-circle"/>
                             </AppLink>
                         </small>
