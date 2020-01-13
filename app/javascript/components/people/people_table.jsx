@@ -20,9 +20,9 @@ class PeopleTable extends React.Component {
                 <tr key={p.id}>
                     <td>
                         <AppLink
-                            path={"/person"}
+                            path={`/person?id=${p.id}`}
                             text={p.name}
-                            state={{person: p, routing_options: {breadcrumb_name: `Person: ${p.name}`}}}/>
+                            state={{routing_options: {breadcrumb_name: `Person: ${p.name}`}}}/>
                     </td>
                     <td>{p.description}</td>
                     <td>{p.wikipedia_link}</td>

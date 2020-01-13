@@ -1,4 +1,5 @@
 import React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 class LoadingView extends React.Component{
 
@@ -9,8 +10,8 @@ class LoadingView extends React.Component{
     render(){
         if(this.props.loading){
             return(
-                <div>
-                    <div>Loading...</div>
+                <div className="row">
+                    <div className="col-sm-12 col-md-12 mx-auto" style={{textAlign: "center"}}><FontAwesomeIcon icon="spinner" spin /></div> 
                 </div>       
             )   
         } else {

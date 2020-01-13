@@ -27,6 +27,15 @@ module App
           render json: quote.as_app_json
         end
 
+        def destroy
+          quote = Quote.find(params[:id])
+          if quote.destroy
+              render json: {result: true}
+          else
+              render json: {result: false}
+          end
+      end
+
         def quote_params
           params.require(:quote).permit(:id, :person_id, :publication_id, :key_words, { quote_texts_attributes: [:id, :text, :translation_id], :citation => []})
         end

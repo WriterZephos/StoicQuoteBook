@@ -10,25 +10,37 @@ module App
         end
 
         def show
-            person = Person.find(params[:id])
-            render json: person.as_app_json
+            render json: {person: Person.find(params[:id]).as_app_json}
         end
     
         def create
             person = Person.new(person_params)
             if person.save
-                render json: person.as_app_json
+                render json: {successful: true, person: person.as_app_json}
             elsif
-                render json: person.as_app_json
+                render json: {successful: false, errors: person.errors.full_messages}, status: 422
             end
         end
 
         def update
             person = Person.find(params[:id])
-            person.update(person_params)
-            render json: person.as_app_json
+            if person.update(person_params)
+                render json: {successful: true, person: person.as_app_json}
+            elsif
+                render json: {successful: false, errors: person.errors.full_messages}, status: 422
+            end
+            
         end
     
+        def destroy
+            person = Person.find(params[:id])
+            if person.destroy
+                render json: {successful: true}
+            else
+                render json: {successful: false, errors: person.errors.full_messages}, status: 422
+            end
+        end
+
         def person_params
             params[:person].permit(:name, :description, :wikipedia_link, :approved)
         end

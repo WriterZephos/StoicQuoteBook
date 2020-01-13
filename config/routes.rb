@@ -8,9 +8,9 @@ Rails.application.routes.draw do
   end
 
   namespace :app do
-    resources :quotes, only: [:index, :create, :update, :show, :delete]
-    resources :people, only: [:index, :create, :update, :show, :delete]
-    resources :publications, only: [:index, :create, :update, :show, :delete]
+    resources :quotes, only: [:index, :create, :update, :show, :destroy]
+    resources :people, only: [:index, :create, :update, :show, :destroy]
+    resources :publications, only: [:index, :create, :update, :show, :destroy]
     get '/publications_by/:person_id' => 'publications#publications_by'
   end
 

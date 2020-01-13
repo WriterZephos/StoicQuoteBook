@@ -1,6 +1,7 @@
 import React from 'react'
 import AppLink from '../common/app_link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import LoadingView from '../common/loading_view'
 
 /*
     There are two ways to render the PersonShow.
@@ -15,9 +16,9 @@ class PersonShow extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            person: props.person,
+            person: props.person ? props.person : this.getBlankPerson(),
             person_id: props.id,
-            status: props.person_id && !props.person ? "loading" : "ready"
+            status: props.person ? "ready" : "loading"
         }
     }
 
@@ -25,8 +26,12 @@ class PersonShow extends React.Component {
         this.getData();
     }
 
+    getBlankPerson(){
+        return {name: "", description: "", wikipedia_link: "", approved: false};
+    }
+
     getData(){
-        if(this.state.person_id && !this.state.person){
+        if(this.state.person_id && !this.state.person.id){
             $.ajax({
                 type: "get",
                 url: `/app/people/${this.state.person_id}`,
@@ -35,7 +40,7 @@ class PersonShow extends React.Component {
                     'Content-Type': 'application/json'
                 },
                 success:(data)=>{
-                    this.setState({person: data, status: "ready"});
+                    this.setState({person: data.person, status: "ready"});
                 }
             });
         }
@@ -43,7 +48,7 @@ class PersonShow extends React.Component {
 
     render(){
         return (
-            <div>
+            <LoadingView loading={this.state.status === "loading"}>
                 <div className="row">
                     <div className="col-sm-12 col-md-12 mx-auto">
                         <h2>
@@ -67,7 +72,7 @@ class PersonShow extends React.Component {
                         <p>{this.state.person.description}</p>
                     </div>
                 </div>
-            </div>
+            </LoadingView>
         );
     }
 }

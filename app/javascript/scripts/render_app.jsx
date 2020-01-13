@@ -1,13 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import App from '../components/app'
+import AppRouter from '../components/app_router'
 import { createBrowserHistory } from 'history'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPlusCircle, faMinusCircle, faEdit, faBan, faTrash, faUndo } from '@fortawesome/free-solid-svg-icons'
+import { faPlusCircle, faMinusCircle, faEdit, faBan, faTrash, faUndo, faSpinner, faInfoCircle, faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    library.add(faPlusCircle, faMinusCircle, faEdit, faBan, faTrash, faUndo);
+    library.add(faPlusCircle, faMinusCircle, faEdit, faBan, faTrash, faUndo, faSpinner, faInfoCircle, faCheckCircle, faExclamationCircle);
 
     window.app_vars = {
         app_history: createBrowserHistory(),
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     ReactDOM.render(
-        <App/>,
+        <AppRouter/>,
         document.body.appendChild(document.createElement('div')),
     );
 

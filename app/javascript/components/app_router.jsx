@@ -12,7 +12,7 @@ import PublicationsIndex from './publications/publications_index'
 import PublicationShow from './publications/publication_show'
 import PublicationForm from './publications/publication_form'
 
-class App extends React.Component{
+class AppRouter extends React.Component{
 
     constructor(props){
         super(props);
@@ -218,4 +218,4 @@ class App extends React.Component{
     }
 }
 
-export default App
+export default AppRouter

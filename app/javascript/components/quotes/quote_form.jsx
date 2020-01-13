@@ -22,7 +22,7 @@ class QuoteForm extends React.Component {
             publications: [],
             people: [],
             warnings: {},
-            status: (props.quote && !props.id) ? "ready" : "loading"
+            status: (props.quote || (!props.quote && !props.id)) ? "ready" : "loading"
         };
 
         if(props.quote){

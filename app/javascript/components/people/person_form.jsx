@@ -1,6 +1,8 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import AppLink from '../common/app_link'
+import NotificationView from '../common/notification_view'
+import LoadingView from '../common/loading_view'
 
 /*
     There are three ways to render the PersonForm.
@@ -20,12 +22,16 @@ class PersonForm extends React.Component {
             original_person: props.person ? JSON.parse(JSON.stringify(props.person)) : this.getBlankPerson(),
             person_id: props.id,
             warnings: {},
-            status: (props.person && !props.id) ? "ready" : "loading"
+            status: (props.person || (!props.person && !props.id)) ? "ready" : "loading",
+            notifications: [],
+            notification_options: {}
         }
         this.changeValue = this.changeValue.bind(this);
         this.delete = this.delete.bind(this);
         this.cancel = this.cancel.bind(this);
         this.reset = this.reset.bind(this);
+        this.empty = this.empty.bind(this);
+        this.clear_notifications = this.clear_notifications.bind(this);
     }
 
     componentDidMount(){
@@ -33,7 +39,7 @@ class PersonForm extends React.Component {
     }
 
     getData(){
-        if(this.state.person_id && !this.state.person){
+        if(this.state.person_id && !this.state.person.id){
             $.ajax({
                 type: "get",
                 url: `/app/people/${this.state.person_id}`,
@@ -42,8 +48,23 @@ class PersonForm extends React.Component {
                     'Content-Type': 'application/json',
                     'X-CSRF-Token': this.csrf_token
                 },
-                success:(data)=>{
-                    this.setState({person: JSON.parse(JSON.stringify(data)), original_person: JSON.parse(JSON.stringify(data)), status: "ready"});
+                success: (data) => {
+                    this.setState({
+                        person: JSON.parse(JSON.stringify(data.person)), 
+                        original_person: JSON.parse(JSON.stringify(data.person)), 
+                        status: "ready"});
+                },
+                error: (data) => {
+                    let notifications = [{message: `An error ocurred. The requested person could not be loaded!`, type: "error"}];
+                    if(data.errors){
+                        data.errors.forEach((error) => {
+                            notifications.push({message: error, type: "error"});
+                        });
+                    }
+                    let notification_options = [{verb: "Back", callback: this.cancel}]
+                    this.setState({
+                        notifications: notifications, 
+                        notification_options: notification_options});
                 }
             });
         }
@@ -91,12 +112,17 @@ class PersonForm extends React.Component {
 
     reset(event){
         event.preventDefault();
-        this.setState({person: JSON.parse(JSON.stringify(this.state.original_person))});
+        this.setState({person: JSON.parse(JSON.stringify(this.state.original_person)), notification_options: [], notifications: []});
     }
 
-    cancel(){
+    cancel(event){
         event.preventDefault();
-        window.app_vars.app_history.goBack();
+        window.app_vars.app_history.go(-1);
+    }
+
+    empty(event){
+        event.preventDefault();
+        this.setState({person: this.getBlankPerson(), notification_options: [], notifications: []});
     }
 
     delete(){
@@ -129,7 +155,27 @@ class PersonForm extends React.Component {
                         'X-CSRF-Token': window.app_vars.csrf_token
                     },
                     success:(data)=>{
-                        this.setState({person: data});
+                        let notifications = [
+                            {message: `${this.state.person.name} was successfully updated!`, type: "success"}
+                        ]
+                        let notification_options = [{verb: "Return", callback: this.cancel}]
+                        this.setState({
+                            person: JSON.parse(JSON.stringify(data.person)), 
+                            original_person: JSON.parse(JSON.stringify(data.person)), 
+                            notifications: notifications, 
+                            notification_options: notification_options});
+                    },
+                    error: (data) => {
+                        let notifications = [{message: `An error ocurred. ${this.state.person.name} could not be updated!`, type: "error"}];
+                        if(data.responseJSON.errors){
+                            data.responseJSON.errors.forEach((error) => {
+                                notifications.push({message: error, type: "error"});
+                            });
+                        }
+                        let notification_options = [{verb: "Cancel", callback: this.cancel},{verb: "Return", callback: this.clear_notifications}]
+                        this.setState({
+                            notifications: notifications, 
+                            notification_options: notification_options});
                     }
                 });
             } else {
@@ -142,76 +188,100 @@ class PersonForm extends React.Component {
                         'X-CSRF-Token': window.app_vars.csrf_token
                     },
                     success:(data)=>{
-                        this.setState({person: data});
+                        let notifications = [{message: `${this.state.person.name} was successfully saved!`, type: "success"}]
+                        let notification_options = [{verb: "Save Another", callback: this.empty},{verb: "Return", callback: this.cancel}]
+                        this.setState({
+                            person: JSON.parse(JSON.stringify(data.person)), 
+                            original_person: JSON.parse(JSON.stringify(data.person)), 
+                            notifications: notifications,
+                            notification_options: notification_options});
+                    },
+                    error: (data) => {
+                        let notifications = [{message: `An error ocurred. ${this.state.person.name} could not be saved!`, type: "error"}];
+                        if(data.responseJSON.errors){
+                            data.responseJSON.errors.forEach((error) => {
+                                notifications.push({message: error, type: "error"});
+                            });
+                        }
+                        let notification_options = [{verb: "Cancel", callback: this.cancel},{verb: "Return", callback: this.clear_notifications}]
+                        this.setState({
+                            notifications: notifications, 
+                            notification_options: notification_options});
                     }
                 });
             }
         }
     }
 
+    clear_notifications(){
+        this.setState({notifications: [], notification_options: {}});
+    }
+
     render(){
         return (
-            <div>
-                <form>
-                    <div>
-                        <div className="row">
-                            <div className="col-sm-12 col-md-12">
-                                <h2>
-                                    {(this.state.person && this.state.person.id) ? `Editing ${this.state.person.name}` : "New Person"}
-                                    {this.state.person.id && <AppLink path="" onClick={this.delete} style={{float: "right", color: "red"}}>
-                                        <FontAwesomeIcon icon="trash"/>
-                                    </AppLink>}
-                                    <span style={{float: "right"}}>{'\u00A0'}</span>
-                                    <AppLink path="" onClick={this.cancel} style={{float: "right"}}>
-                                        <FontAwesomeIcon icon="ban"/>
-                                    </AppLink>
-                                    <span style={{float: "right"}}>{'\u00A0'}</span>
-                                    <AppLink path="" onClick={this.reset} style={{float: "right"}}>
-                                        <FontAwesomeIcon icon="undo"/>
-                                    </AppLink>
-                                </h2>
+            <NotificationView notifications={this.state.notifications} notification_options={this.state.notification_options}>
+                <LoadingView loading={this.state.status === "loading" && this.state.notifications.length === 0}>
+                    <form>
+                        <div>
+                            <div className="row">
+                                <div className="col-sm-12 col-md-12">
+                                    <h2>
+                                        {(this.state.original_person && this.state.original_person.id) ? `Editing ${this.state.original_person.name}` : "New Person"}
+                                        {this.state.original_person.id && <AppLink path="" onClick={this.delete} style={{float: "right", color: "red"}}>
+                                            <FontAwesomeIcon icon="trash"/>
+                                        </AppLink>}
+                                        <span style={{float: "right"}}>{'\u00A0'}</span>
+                                        <AppLink path="" onClick={this.cancel} style={{float: "right"}}>
+                                            <FontAwesomeIcon icon="ban"/>
+                                        </AppLink>
+                                        <span style={{float: "right"}}>{'\u00A0'}</span>
+                                        <AppLink path="" onClick={this.reset} style={{float: "right"}}>
+                                            <FontAwesomeIcon icon="undo"/>
+                                        </AppLink>
+                                    </h2>
+                                </div>
+                            </div>
+                            <br/>
+                            <div className="row">
+                                <div className="col-sm-12 col-md-6 form-group">
+                                    <label htmlFor="name">Full Name (including title)</label>
+                                    <input 
+                                        id="name" 
+                                        className="form-control" 
+                                        type="text"
+                                        value={this.state.person.name}
+                                        onChange={this.changeValue}/>
+                                    <span style={{color: "red"}}>{this.getWarning("name")}</span>
+                                </div>
+                                <div className="col-sm-12 col-md-6 form-group">
+                                    <label htmlFor="name">Wikipedia Link</label>
+                                    <input
+                                        id="wikipedia_link" 
+                                        className="form-control" 
+                                        type="text"
+                                        value={this.state.person.wikipedia_link} 
+                                        onChange={this.changeValue}/>
+                                    <span style={{color: "red"}}>{this.getWarning("wikipedia_link")}</span>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-sm-12 form-group">
+                                    <label htmlFor="description">Short Description</label>
+                                    <textarea
+                                        maxLength="400"
+                                        id="description"
+                                        className="form-control" 
+                                        value={this.state.person.description} 
+                                        onChange={this.changeValue}></textarea>
+                                    <span style={{color: "red"}}>{this.getWarning("description")}</span>
+                                </div>
                             </div>
                         </div>
                         <br/>
-                        <div className="row">
-                            <div className="col-sm-12 col-md-6 form-group">
-                                <label htmlFor="name">Full Name (including title)</label>
-                                <input 
-                                    id="name" 
-                                    className="form-control" 
-                                    type="text"
-                                    value={this.state.person.name}
-                                    onChange={this.changeValue}/>
-                                <span style={{color: "red"}}>{this.getWarning("name")}</span>
-                            </div>
-                            <div className="col-sm-12 col-md-6 form-group">
-                                <label htmlFor="name">Wikipedia Link</label>
-                                <input
-                                    id="wikipedia_link" 
-                                    className="form-control" 
-                                    type="text"
-                                    value={this.state.person.wikipedia_link} 
-                                    onChange={this.changeValue}/>
-                                <span style={{color: "red"}}>{this.getWarning("wikipedia_link")}</span>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-12 form-group">
-                                <label htmlFor="description">Short Description</label>
-                                <textarea
-                                    maxLength="400"
-                                    id="description"
-                                    className="form-control" 
-                                    value={this.state.person.description} 
-                                    onChange={this.changeValue}></textarea>
-                                <span style={{color: "red"}}>{this.getWarning("description")}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <br/>
-                    <input type="button" className="btn btn-primary" value="Save" onClick={() => {this.save()}}/>
-                </form>
-            </div>
+                        <input type="button" className="btn btn-primary" value="Save" onClick={() => {this.save()}}/>
+                    </form>
+                </LoadingView>
+            </NotificationView>
         );
     }
 }

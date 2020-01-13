@@ -25,7 +25,7 @@ class PublicationForm extends React.Component {
             translations_loaded: false,
             people_loaded: false,
             warnings: {},
-            status: (props.publication && !props.publication) ? "ready" : "loading"
+            status: (props.publication || (!props.publication && !props.id)) ? "ready" : "loading"
         };
 
         this.csrf_token = this.props.csrf_token;
@@ -62,7 +62,7 @@ class PublicationForm extends React.Component {
             }
         });
 
-        if (this.state.publication_id && !this.state.publication) {
+        if (this.state.publication_id && !this.state.publication.id) {
             $.ajax({
                 type: "get",
                 url: `/app/publications/${this.state.publication_id}`,
@@ -187,12 +187,12 @@ class PublicationForm extends React.Component {
     }
 
     addTranslationField(event) {
-        let temp = [...this.state.publication.translations_attributes];
-        temp.push({ id: null, translator: "", description: "" });
-        this.setState({ publication: { ...this.state.publication, translations_attributes: temp } });
         if (event) {
             event.preventDefault();
         }
+        let temp = [...this.state.publication.translations_attributes];
+        temp.push({ id: null, translator: "", description: "" });
+        this.setState({ publication: { ...this.state.publication, translations_attributes: temp } })
     }
 
     removeCitationField(event) {
@@ -227,8 +227,13 @@ class PublicationForm extends React.Component {
 
         // ensure there is at least one translation if is_translated is true.
         let callback;
-        if (temp.is_translated === "true" && temp.translations_attributes.length === 0) {
-            callback = this.addTranslationField;
+        if (event.target.id === "is_translated") {
+            if(event.target.value === "false"){
+                temp.translations_attributes = [];
+            } else if(event.target.value === "true" && temp.translations_attributes.length === 0){
+                //callback = this.addTranslationField;
+                temp.translations_attributes.push({ id: null, translator: "", description: "" });
+            }
         }
 
         this.setState({ publication: temp }, callback);
@@ -270,7 +275,7 @@ class PublicationForm extends React.Component {
                     'X-CSRF-Token': window.app_vars.csrf_token
                 },
                 success:(data)=>{
-                    window.app_func.route('/quotes');
+                    window.app_func.route('/publications');
                 }
             });
         }
@@ -357,7 +362,7 @@ class PublicationForm extends React.Component {
                     </div>
                     <div className="col-sm-12 col-md-6 form-group">
                         <label htmlFor={index + "|description"}>Description</label>
-                        <input disabled={translation.id} value={translation.description} id={index + "|description"} className="form-control" type="text" value={translation.description} onChange={this.changeTranslationValue} />
+                        <input value={translation.description} id={index + "|description"} className="form-control" type="text" value={translation.description} onChange={this.changeTranslationValue} />
                         <span style={{ color: "red" }}>{this.getWarning(index + "|description")}</span>
                     </div>
                     {index > 0 && !translation.id && <div className="form-group" style={{ paddingTop: "40px", marginRight: "-50px", width: "50px" }}>

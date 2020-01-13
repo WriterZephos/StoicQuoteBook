@@ -32,6 +32,15 @@ module App
             publication.update(publication_params)
             render json: publication.as_app_json
         end
+
+        def destroy
+            publication = Publication.find(params[:id])
+            if publication.destroy
+                render json: {result: true}
+            else
+                render json: {result: false}
+            end
+        end
     
         def publication_params
             params.require(:publication).permit(:title, :description, :person_id, :wikipedia_link, :is_translated, { translations_attributes: [:id, :translator, :description]}, :citation_fields => [])
