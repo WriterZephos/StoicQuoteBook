@@ -1,5 +1,6 @@
 import React from 'react'
 import AppLink from '../common/app_link'
+import FadeIn from 'react-fade-in'
 
 class PeopleTable extends React.Component {
 

@@ -137,6 +137,7 @@ class PersonForm extends React.Component {
                     'X-CSRF-Token': window.app_vars.csrf_token
                 },
                 success:(data)=>{
+                    // TODO fix this IO function to use notifications, etc.
                     window.app_func.route('/people');
                 }
             });

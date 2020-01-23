@@ -1,5 +1,6 @@
 import React from 'react'
 import QueryString from 'query-string'
+import { CSSTransition } from "react-transition-group";
 import HomeIndex from './home/home_index'
 import IndexLayout from './layouts/index_layout'
 import PeopleIndex from './people/people_index'
@@ -212,7 +213,9 @@ class AppRouter extends React.Component{
     render(){
         return (
             <IndexLayout>
-                {this.render_route()}
+                <CSSTransition classNames="app" timeout={3000} appear={true}> 
+                    {this.render_route()}
+                </CSSTransition>
             </IndexLayout>
         );
     }

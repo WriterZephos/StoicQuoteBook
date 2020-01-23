@@ -3,8 +3,10 @@ Rails.application.routes.draw do
 
   root 'index#index'
 
-  namespace :api do 
+  get '/service-worker.js' => "service_workers#service_worker"
+  get '/manifest.json' => "service_workers#manifest"
 
+  namespace :api do 
   end
 
   namespace :app do
