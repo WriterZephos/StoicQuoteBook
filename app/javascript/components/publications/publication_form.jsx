@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { AppContext, RouterContext } from '../app_contexts';
 import AppLink from '../common/app_link'
 
 /*
@@ -11,11 +12,12 @@ import AppLink from '../common/app_link'
 
     If a publication and an id are passed in, no request will be made to get the publication.
 */
-class PublicationForm extends React.Component {
+class PublicationFormMain extends React.Component {
 
     constructor(props) {
         super(props);
-
+        this.router = props.router;
+        this.app = props.app;
         this.state = {
             publication: props.publication ? JSON.parse(JSON.stringify(props.publication)) : this.getBlankPublication(),
             original_publication: props.publication ? JSON.parse(JSON.stringify(props.publication)) : this.getBlankPublication(),
@@ -259,8 +261,7 @@ class PublicationForm extends React.Component {
     }
 
     cancel(event){
-        event.preventDefault();
-        window.app_vars.app_history.goBack();
+        this.router.go_back();
     }
 
     delete(event){
@@ -272,10 +273,10 @@ class PublicationForm extends React.Component {
                 data: JSON.stringify({publication: this.state.publication}),
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-Token': window.app_vars.csrf_token
+                    'X-CSRF-Token': this.app.csrf_token
                 },
                 success:(data)=>{
-                    window.app_func.route('/publications');
+                    this.router.route('/publications');
                 }
             });
         }
@@ -291,7 +292,7 @@ class PublicationForm extends React.Component {
                     data: JSON.stringify({ publication: this.state.publication }),
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-Token': window.app_vars.csrf_token
+                        'X-CSRF-Token': this.app.csrf_token
                     },
                     success: (data) => {
                         this.setState({ publication: data });
@@ -304,7 +305,7 @@ class PublicationForm extends React.Component {
                     data: JSON.stringify({ publication: this.state.publication }),
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-Token': window.app_vars.csrf_token
+                        'X-CSRF-Token': this.app.csrf_token
                     },
                     success: (data) => {
                         this.setState({ publication: data });
@@ -450,6 +451,12 @@ class PublicationForm extends React.Component {
             </div>
         );
     };
+}
+
+function PublicationForm(props) {
+    var app = useContext(AppContext);
+    var router = useContext(RouterContext);
+    return(<PublicationFormMain {...props} app={app} router={router}/>)
 }
 
 export default PublicationForm

@@ -17,7 +17,7 @@ class AppRepository extends React.Component{
 
     render(){
         return(
-            <AppRouter repoository={this.state.repoository}/>
+            <AppRouter repository={this.state.repository}/>
         );
     }
 

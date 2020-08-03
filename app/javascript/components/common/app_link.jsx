@@ -1,6 +1,8 @@
 import React from 'react'
+import { RouterContext } from '../app_contexts';
 
 class AppLink extends React.Component {
+    static contextType = RouterContext;
 
     constructor(props){
         super(props);
@@ -11,7 +13,7 @@ class AppLink extends React.Component {
         if(this.props.onClick){
             this.props.onClick(event,this.state);
         } else {
-            window.app_func.route_from_link(event, this.state);
+            this.context.route_from_link(event, this.state);
         }
     }
 

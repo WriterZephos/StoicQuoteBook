@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { AppContext, RouterContext } from '../app_contexts';
 import AppLink from '../common/app_link'
 
 /*
@@ -11,10 +12,12 @@ import AppLink from '../common/app_link'
 
     If a quote and an id are passed in, no request will be made to get the quote.
 */
-class QuoteForm extends React.Component {
+class QuoteFormMain extends React.Component {
 
     constructor(props){
         super(props);
+        this.router = props.router;
+        this.app = props.app;
         this.state = {
             quote: props.quote ? JSON.parse(JSON.stringify(props.quote)) : this.getBlankQuote(),
             original_quote: props.quote ? JSON.parse(JSON.stringify(props.quote)) : this.getBlankQuote(),
@@ -229,8 +232,7 @@ class QuoteForm extends React.Component {
     }
 
     cancel(){
-        event.preventDefault();
-        window.app_vars.app_history.goBack();
+        this.router.go_back();
     }
 
     delete(){
@@ -242,10 +244,10 @@ class QuoteForm extends React.Component {
                 data: JSON.stringify({quote: this.state.quote}),
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-Token': window.app_vars.csrf_token
+                    'X-CSRF-Token':this.app.csrf_token
                 },
                 success:(data)=>{
-                    window.app_func.route('/quotes');
+                    this.router.route('/quotes');
                 }
             });
         }
@@ -262,7 +264,7 @@ class QuoteForm extends React.Component {
                     data: JSON.stringify({quote: this.state.quote}),
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-Token': window.app_vars.csrf_token
+                        'X-CSRF-Token':this.app.csrf_token
                     },
                     success:(data)=>{
                             this.setState({quote: data});
@@ -275,7 +277,7 @@ class QuoteForm extends React.Component {
                     data: JSON.stringify({quote: this.state.quote}),
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-Token': window.app_vars.csrf_token
+                        'X-CSRF-Token':this.app.csrf_token
                     },
                     success:(data)=>{
                             this.setState({quote: data});
@@ -473,6 +475,12 @@ class QuoteForm extends React.Component {
             </div>
         );
     };
+}
+
+function QuoteForm(props) {
+    var app = useContext(AppContext);
+    var router = useContext(RouterContext);
+    return(<QuoteFormMain {...props} app={app} router={router}/>)
 }
 
 export default QuoteForm

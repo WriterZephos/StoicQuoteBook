@@ -1,6 +1,8 @@
 import React from 'react'
 import QueryString from 'query-string'
+import { createBrowserHistory } from 'history'
 import { CSSTransition } from "react-transition-group";
+import { RouterContext } from './app_contexts';
 import HomeIndex from './home/home_index'
 import IndexLayout from './layouts/index_layout'
 import PeopleIndex from './people/people_index'
@@ -17,6 +19,8 @@ class AppRouter extends React.Component{
 
     constructor(props){
         super(props);
+        this.app_history = createBrowserHistory();
+        this.history_unlisten = this.app_history.listen(this.routing_listener.bind(this));
 
         this.default_route = {
             path: '/',
@@ -25,7 +29,11 @@ class AppRouter extends React.Component{
             action: (props) => <HomeIndex {...props}/>
         }
 
-        this.state = {current_route: {...this.default_route}, breadcrumbs:[{...this.default_route}]};
+        this.state = {
+            current_route: {...this.default_route}, 
+            breadcrumbs:[{...this.default_route}],
+            
+        };
         
         this.routes = [
             {...this.default_route},
@@ -85,7 +93,43 @@ class AppRouter extends React.Component{
             }
         ];
 
-        this.state.history_unlisten = window.app_vars.app_history.listen(this.routing_listener.bind(this));
+        this.route_from_link = this.route_from_link.bind(this);
+        this.route = this.route.bind(this);
+        this.go_back = this.go_back.bind(this);
+        this.go = this.go.bind(this);
+        
+    }
+
+    route_from_link(event,state){
+        event.preventDefault();
+        this.app_history.push(
+            {
+                pathname: event.currentTarget.pathname, 
+                search: event.currentTarget.search,
+                state: state
+            }
+        );
+    };
+
+    route(path,search,state){
+        event.preventDefault();
+        this.app_history.push(
+            {
+                pathname: path, 
+                search: search,
+                state: state
+            }
+        );
+    };
+
+    go_back(){
+        event.preventDefault();
+        this.app_history.goBack();
+    }
+
+    go(delta){
+        event.preventDefault();
+        this.app_history.go(delta);
     }
 
     /*
@@ -205,18 +249,27 @@ class AppRouter extends React.Component{
         2. State from history.location.state.
     */
     render_route(){
-        let props = QueryString.parse(window.app_vars.app_history.location.search);
-        props = {...props, ...window.app_vars.app_history.location.state}
+        let props = QueryString.parse(this.app_history.location.search);
+        props = {...props, ...this.app_history.location.state}
         return this.state.current_route.action(props);
     }
 
     render(){
         return (
-            <IndexLayout>
-                <CSSTransition classNames="app" timeout={3000} appear={true}> 
-                    {this.render_route()}
-                </CSSTransition>
-            </IndexLayout>
+            <RouterContext.Provider 
+                value={{
+                    route_from_link: this.route_from_link, 
+                    route: this.route,
+                    go_back: this.go_back,
+                    go: this.go
+                }}>
+                <IndexLayout>
+                    <CSSTransition classNames="app" timeout={3000} appear={true}> 
+                        {this.render_route()}
+                    </CSSTransition>
+                </IndexLayout>
+            </RouterContext.Provider>
+            
         );
     }
 }

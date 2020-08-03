@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { RouterContext, AppContext } from '../app_contexts';
 import AppLink from '../common/app_link'
 import NotificationView from '../common/notification_view'
 import LoadingView from '../common/loading_view'
@@ -13,10 +14,12 @@ import LoadingView from '../common/loading_view'
 
     If a person and an id are passed in, no request will be made to get the person.
 */
-class PersonForm extends React.Component {
+class PersonFormMain extends React.Component {
 
     constructor(props){
         super(props);
+        this.router = props.router;
+        this.app = props.app;
         this.state = {
             person: props.person ? JSON.parse(JSON.stringify(props.person)) : this.getBlankPerson(),
             original_person: props.person ? JSON.parse(JSON.stringify(props.person)) : this.getBlankPerson(),
@@ -116,8 +119,7 @@ class PersonForm extends React.Component {
     }
 
     cancel(event){
-        event.preventDefault();
-        window.app_vars.app_history.go(-1);
+        this.router.go_back();
     }
 
     empty(event){
@@ -134,11 +136,11 @@ class PersonForm extends React.Component {
                 data: JSON.stringify({person: this.state.person}),
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-Token': window.app_vars.csrf_token
+                    'X-CSRF-Token': this.app.csrf_token
                 },
                 success:(data)=>{
                     // TODO fix this IO function to use notifications, etc.
-                    window.app_func.route('/people');
+                    this.router.route('/people');
                 }
             });
         }
@@ -153,7 +155,7 @@ class PersonForm extends React.Component {
                     data: JSON.stringify({person: this.state.person}),
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-Token': window.app_vars.csrf_token
+                        'X-CSRF-Token': this.app.csrf_token
                     },
                     success:(data)=>{
                         let notifications = [
@@ -186,7 +188,7 @@ class PersonForm extends React.Component {
                     data: JSON.stringify({person: this.state.person}),
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-Token': window.app_vars.csrf_token
+                        'X-CSRF-Token': this.app.csrf_token
                     },
                     success:(data)=>{
                         let notifications = [{message: `${this.state.person.name} was successfully saved!`, type: "success"}]
@@ -285,6 +287,12 @@ class PersonForm extends React.Component {
             </NotificationView>
         );
     }
+}
+
+function PersonForm(props) {
+    var app = useContext(AppContext);
+    var router = useContext(RouterContext);
+    return(<PersonFormMain {...props} app={app} router={router}/>)
 }
 
 export default PersonForm
