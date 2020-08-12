@@ -13,7 +13,7 @@ class AppLink extends React.Component {
         if(this.props.onClick){
             this.props.onClick(event,this.state);
         } else {
-            this.context.route_from_link(event, this.state);
+            this.context.routeFromLink(event, this.state);
         }
     }
 

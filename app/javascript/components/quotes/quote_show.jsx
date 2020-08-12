@@ -93,7 +93,7 @@ class QuoteShowMain extends React.Component {
     }
 
     cancel(){
-        this.router.go_back();
+        this.router.goBack();
     }
 
     render(){

@@ -5,6 +5,8 @@ import { CSSTransition } from "react-transition-group";
 import { RouterContext } from './app_contexts';
 import HomeIndex from './home/home_index'
 import IndexLayout from './layouts/index_layout'
+import NotificationView from './common/notification_view'
+import LoadingView from './common/loading_view'
 import PeopleIndex from './people/people_index'
 import PersonShow from './people/person_show'
 import PersonForm from './people/person_form'
@@ -20,7 +22,7 @@ class AppRouter extends React.Component{
     constructor(props){
         super(props);
         this.app_history = createBrowserHistory();
-        this.history_unlisten = this.app_history.listen(this.routing_listener.bind(this));
+        this.history_unlisten = this.app_history.listen(this.routingListener.bind(this));
 
         this.default_route = {
             path: '/',
@@ -93,14 +95,14 @@ class AppRouter extends React.Component{
             }
         ];
 
-        this.route_from_link = this.route_from_link.bind(this);
+        this.routeFromLink = this.routeFromLink.bind(this);
         this.route = this.route.bind(this);
-        this.go_back = this.go_back.bind(this);
+        this.goBack = this.goBack.bind(this);
         this.go = this.go.bind(this);
         
     }
 
-    route_from_link(event,state){
+    routeFromLink(event,state){
         event.preventDefault();
         this.app_history.push(
             {
@@ -122,7 +124,7 @@ class AppRouter extends React.Component{
         );
     };
 
-    go_back(){
+    goBack(){
         event.preventDefault();
         this.app_history.goBack();
     }
@@ -135,11 +137,11 @@ class AppRouter extends React.Component{
     /*
         This is the callback that gets called when a new location is pushed to history.
     */
-    routing_listener(location, action){
+    routingListener(location, action){
         // Set display to false.
         this.setState({display: false}, () => {
             // Find route configuration.
-            let route = this.get_matching_route(location);
+            let route = this.getMatchingRoute(location);
             
             // Use default route if no configuration was found.
             if(!route){
@@ -147,7 +149,7 @@ class AppRouter extends React.Component{
             }
 
             // Update breadcrumbs, then update the current route.
-            this.update_breadcrumbs(route, location, action, () => {
+            this.updateBreadcrumbs(route, location, action, () => {
                 // Log breadcrumbs to console.
                 let bc_array = this.breadcrumbs();
                 console.log(bc_array.join(", "));
@@ -157,14 +159,10 @@ class AppRouter extends React.Component{
         });
     }
 
-    handle_route_change(location, action){
-
-    }
-
     /*
         Finds a matching route, if it exists, based on the route's regex.
     */
-    get_matching_route(location){
+    getMatchingRoute(location){
         return this.routes.find((route) => {
             let matches = location.pathname.match(route.regex);
             return matches && matches.length > 0;
@@ -174,7 +172,7 @@ class AppRouter extends React.Component{
     /*
         Updates the router's breadcrumbs.
     */
-    update_breadcrumbs(route, location, action, callback){
+    updateBreadcrumbs(route, location, action, callback){
 
         // Get the last route indexs already in the breadcrumbs.
         let last_index = this.state.breadcrumbs.length - 1;
@@ -184,7 +182,7 @@ class AppRouter extends React.Component{
         // Add the current location to the current route, to preserve any custom options, etc.
         instance_route.location = {...location}
 
-        let routing_options = this.routing_options_for_route(instance_route);
+        let routing_options = this.routingOptionsForRoute(instance_route);
 
         // Reset the breadcrumbs for main pages (Home, Home > Quotes, etc) where routing options specify to do so.
         // breadcrumb_index === 0 for root breadcrumb.
@@ -239,7 +237,7 @@ class AppRouter extends React.Component{
         let bc_array = this.state.breadcrumbs.map((route) => {
 
             // Get routing options for the route.
-            let routing_options = this.routing_options_for_route(route);
+            let routing_options = this.routingOptionsForRoute(route);
 
             // If a breadcrumb name is configured, use that. Otherwise, use the path.
             if(routing_options && routing_options.breadcrumb_name){
@@ -252,7 +250,7 @@ class AppRouter extends React.Component{
         return bc_array;
     }
 
-    routing_options_for_route(route){
+    routingOptionsForRoute(route){
         let routing_options;
 
         // Get routing options if there are any. 
@@ -276,7 +274,7 @@ class AppRouter extends React.Component{
         1. Query string props.
         2. State from history.location.state.
     */
-    render_route(){
+    renderRoute(){
         let props = QueryString.parse(this.app_history.location.search);
         props = {...props, ...this.app_history.location.state}
         return this.state.current_route.action(props);
@@ -286,15 +284,19 @@ class AppRouter extends React.Component{
         return (
             <RouterContext.Provider 
                 value={{
-                    route_from_link: this.route_from_link, 
+                    routeFromLink: this.routeFromLink, 
                     route: this.route,
-                    go_back: this.go_back,
+                    goBack: this.goBack,
                     go: this.go
                 }}>
                 <IndexLayout>
-                    <CSSTransition classNames="app" timeout={300} in={this.state.display} appear> 
-                        {this.render_route()}
-                    </CSSTransition>
+                    <NotificationView>
+                        <LoadingView>
+                            <CSSTransition classNames="app" timeout={300} in={this.state.display} appear> 
+                                {this.renderRoute()}
+                            </CSSTransition>
+                        </LoadingView>
+                    </NotificationView>
                 </IndexLayout>
             </RouterContext.Provider>
             

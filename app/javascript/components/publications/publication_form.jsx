@@ -261,7 +261,7 @@ class PublicationFormMain extends React.Component {
     }
 
     cancel(event){
-        this.router.go_back();
+        this.router.goBack();
     }
 
     delete(event){

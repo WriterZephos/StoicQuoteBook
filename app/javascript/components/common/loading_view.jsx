@@ -1,10 +1,17 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { LoadingContext } from '../app_contexts';
 
 class LoadingView extends React.Component{
 
     constructor(props){
         super(props);
+        this.state = {loading: false};
+        this.setLoading = this.setLoading.bind(this);
+    }
+
+    setLoading(loading){
+        this.setState({loading: loading})
     }
 
     render(){
@@ -16,7 +23,12 @@ class LoadingView extends React.Component{
             )   
         } else {
             return(
-                this.props.children
+                <LoadingContext.Provider 
+                value={{
+                    setLoading: this.setLoading
+                }}>
+                    {this.props.children}
+                </LoadingContext.Provider>
             )
         }
     }

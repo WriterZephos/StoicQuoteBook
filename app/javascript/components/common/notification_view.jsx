@@ -1,76 +1,77 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import AppLink from './app_link'
+import { NotificationContext } from '../app_contexts';
 
 /*
-    This class accepts a list of notifications and options for how to display them,
-    as well as options determining the behavior for confirmations, etc.
+    This class accepts a list of notifications with settings to determine how
+    they are displayed and options for the user (confirm, cancel, etc) with callbacks.
 
-    Notifications can be of the following types: 
+    Notifications have the following settings: 
 
-    info: just plain text.
-    error: red text.
-    process: blue text with a loading icon.
+    type: what type of value.
+        Valid options are: 
+            info = just plain text.
+            error = red text.
+            process = blue text with a loading icon.
     
-    other options: 
+    User options have the following attributes: 
     
-    option_1: true/false
-    option_1_verb: ""
-    option_1_function:
-
-    option_2: true/false
-    option_2_verb: ""
-    option_2_function:
-
-    option_3: true/false
-    option_3_verb: ""
-    option_3_function:
-
-    option_4: true/false
-    option_4_verb: ""
-    option_4_function:
+        verb: the text that will appear on the button.
+        callback: the callback function that will be called when the button is pressed.
 
 */
 class NotificationView extends React.Component{
     constructor(props){
         super(props);
-        this.render_notifications = this.render_notifications.bind(this);
+        this.state = {notifications: [], notification_options: []}
+        this.setNotifications = this.setNotifications.bind(this);
+        this.resetNotifications = this.resetNotifications.bind(this);
     }
 
-    render_notifications(){
-        return this.props.notifications.map((notification, index) => {
+    setNotifications(notifications, notification_options){
+        this.setState({
+            notifications: notifications, 
+            notification_options: notification_options});
+    }
+
+   resetNotifications(){
+        this.setState({notifications: [], notification_options: {}});
+    }
+
+    renderNotifications(){
+        return this.state.notifications.map((notification, index) => {
             switch(notification.type){
                 case "success":
-                    return this.render_success(notification, index);
+                    return this.renderSuccess(notification, index);
                 case "process": 
-                    return this.render_process(notification, index);
+                    return this.renderProcess(notification, index);
                 case "error":
-                    return this.render_error(notification, index);
+                    return this.renderError(notification, index);
                 default: 
-                    return this.render_info(notification, index);
+                    return this.renderInfo(notification, index);
             }
         });
     }
 
-    render_info(notification, index){
+    renderInfo(notification, index){
         return (
             <p key={index} style={{textAlign: "center"}}><FontAwesomeIcon icon="info-circle"/>{'\u00A0'}{notification.message}{notification.html}</p>
         );
     }
 
-    render_success(notification, index){
+    renderSuccess(notification, index){
         return (
             <p key={index} style={{color: "green", textAlign: "center"}}><FontAwesomeIcon icon="check-circle"/>{'\u00A0'}{notification.message}{notification.html}</p>
         );
     }
 
-    render_error(notification, index){
+    renderError(notification, index){
         return (
             <p key={index} style={{color: "red", textAlign: "center"}}><FontAwesomeIcon icon="exclamation-circle"/>{'\u00A0'}{notification.message}{notification.html}</p>
         );
     }
 
-    render_process(notification, index){
+    renderProcess(notification, index){
         return (
             <p key={index} style={{color: "blue", textAlign: "center"}}>
                 <FontAwesomeIcon icon="spinner" spin />{'\u00A0'}{notification.message}{notification.html}
@@ -79,7 +80,7 @@ class NotificationView extends React.Component{
     }
 
     render_options(){
-        return this.props.notification_options.map((option, index) => {
+        return this.state.notification_options.map((option, index) => {
             return (
                 <p key={index} style={{textAlign: "center"}}>
                     <input type="button" className="btn btn-primary" value={option.verb} onClick={option.callback}/>
@@ -89,12 +90,12 @@ class NotificationView extends React.Component{
     }
 
     render(){
-        if(this.props.notifications.length > 0){
+        if(this.state.notifications.length > 0){
             return(
                 <div>
                     <div className="row">
                         <div className="col-sm-6 col-md-6 mx-auto">
-                            {this.render_notifications()}
+                            {this.renderNotifications()}
                         </div>
                     </div>
                     <div className="row">
@@ -106,7 +107,13 @@ class NotificationView extends React.Component{
             );
         } else {
             return(
-                this.props.children
+                <NotificationContext.Provider 
+                value={{
+                    setNotifications: this.setNotifications,
+                    resetNotifications: this.resetNotifications
+                }}>
+                    {this.props.children}
+                </NotificationContext.Provider>
             )
         }
 
