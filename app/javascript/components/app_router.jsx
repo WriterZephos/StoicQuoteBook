@@ -96,6 +96,8 @@ class AppRouter extends React.Component{
             }
         ];
 
+        this.state.current_route = this.getMatchingOrDefaultRoute(this.app_history.location);
+
         this.routeFromLink = this.routeFromLink.bind(this);
         this.route = this.route.bind(this);
         this.goBack = this.goBack.bind(this);
@@ -142,12 +144,7 @@ class AppRouter extends React.Component{
         // Set display to false.
         this.setState({display: false}, () => {
             // Find route configuration.
-            let route = this.getMatchingRoute(location);
-            
-            // Use default route if no configuration was found.
-            if(!route){
-                route = {...this.default_route};
-            }
+            let route = this.getMatchingOrDefaultRoute(location);
 
             // Update breadcrumbs, then update the current route.
             this.updateBreadcrumbs(route, location, action, () => {
@@ -158,6 +155,17 @@ class AppRouter extends React.Component{
                 this.setState({current_route: {...route}, display: true});
             });
         });
+    }
+
+
+    getMatchingOrDefaultRoute(location){
+        let route = this.getMatchingRoute(location);
+            
+        // Use default route if no configuration was found.
+        if(!route){
+            route = {...this.default_route};
+        }
+        return route;
     }
 
     /*
