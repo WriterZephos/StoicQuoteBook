@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { AppContext, RouterContext } from '../app_contexts';
 import AppLink from '../common/app_link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -10,15 +11,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
     If a person and an id are passed in, no request will be made to get the person.
 */
-class PublicationShow extends React.Component {
+class PublicationShowMain extends React.Component {
 
     constructor(props){
         super(props);
+        this.router = props.router;
         this.state = {
             publication: props.publication,
             publication_id: props.id,
             status: props.publication_id && !props.publication ? "loading" : "ready"
         }
+        this.cancel = this.cancel.bind(this);
     }
 
     componentDidMount(){
@@ -39,6 +42,10 @@ class PublicationShow extends React.Component {
                 }
             });
         }
+    }
+
+    cancel(){
+        this.router.go_back();
     }
 
     isTranslated(){
@@ -117,6 +124,10 @@ class PublicationShow extends React.Component {
                             <AppLink path={"/publication_form"} state={{publication: this.state.publication, routing_options: {breadcrumb_name: `Edit ${this.state.publication.title}`}}} style={{float: "right"}}>
                                 <FontAwesomeIcon icon="edit"/>
                             </AppLink>
+                            <span style={{float: "right"}}>{'\u00A0'}</span>
+                            <AppLink path="" onClick={this.cancel} style={{float: "right"}}>
+                                <FontAwesomeIcon icon="arrow-left"/>
+                            </AppLink>
                         </h2>
                     </div>
                 </div>
@@ -147,6 +158,11 @@ class PublicationShow extends React.Component {
             </div>
         );
     }
+}
+function PublicationShow(props) {
+    var app = useContext(AppContext);
+    var router = useContext(RouterContext);
+    return(<PublicationShowMain {...props} app={app} router={router}/>)
 }
 
 export default PublicationShow;

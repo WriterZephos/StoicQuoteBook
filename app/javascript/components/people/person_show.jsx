@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { AppContext, RouterContext } from '../app_contexts';
 import AppLink from '../common/app_link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import LoadingView from '../common/loading_view'
@@ -11,15 +12,17 @@ import LoadingView from '../common/loading_view'
 
     If a person and an id are passed in, no request will be made to get the person.
 */
-class PersonShow extends React.Component {
+class PersonShowMain extends React.Component {
 
     constructor(props){
         super(props);
+        this.router = props.router;
         this.state = {
             person: props.person ? props.person : this.getBlankPerson(),
             person_id: props.id,
             status: props.person ? "ready" : "loading"
         }
+        this.cancel = this.cancel.bind(this);
     }
 
     componentDidMount(){
@@ -46,6 +49,10 @@ class PersonShow extends React.Component {
         }
     }
 
+    cancel(){
+        this.router.go_back();
+    }
+
     render(){
         return (
             <LoadingView loading={this.state.status === "loading"}>
@@ -55,6 +62,10 @@ class PersonShow extends React.Component {
                             {this.state.person.name}{'\u00A0'}
                             <AppLink path={"/person_form"} state={{person: this.state.person, routing_options: {breadcrumb_name: `Edit ${this.state.person.name}`}}} style={{float: "right"}}>
                                 <FontAwesomeIcon icon="edit"/>
+                            </AppLink>
+                            <span style={{float: "right"}}>{'\u00A0'}</span>
+                            <AppLink path="" onClick={this.cancel} style={{float: "right"}}>
+                                <FontAwesomeIcon icon="arrow-left"/>
                             </AppLink>
                         </h2>
                     </div>
@@ -75,6 +86,12 @@ class PersonShow extends React.Component {
             </LoadingView>
         );
     }
+}
+
+function PersonShow(props) {
+    var app = useContext(AppContext);
+    var router = useContext(RouterContext);
+    return(<PersonShowMain {...props} app={app} router={router}/>)
 }
 
 export default PersonShow;

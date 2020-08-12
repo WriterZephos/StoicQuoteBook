@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { AppContext, RouterContext } from '../app_contexts';
 import AppLink from '../common/app_link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -10,15 +11,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
     If a person and an id are passed in, no request will be made to get the person.
 */
-class QuoteShow extends React.Component {
+class QuoteShowMain extends React.Component {
 
     constructor(props){
         super(props);
+        this.router = props.router;
         this.state = {
             quote: props.quote,
             quote_id: props.id,
             status: props.quote_id && !props.quote ? "loading" : "ready"
         }
+
+        this.cancel = this.cancel.bind(this);
     }
 
     componentDidMount(){
@@ -88,6 +92,10 @@ class QuoteShow extends React.Component {
         return quoteTextTable;
     }
 
+    cancel(){
+        this.router.go_back();
+    }
+
     render(){
         return (
             <div>
@@ -97,6 +105,10 @@ class QuoteShow extends React.Component {
                             {`Quote by ${this.state.quote.person.name}`}{'\u00A0'}
                             <AppLink path={"/quote_form"} state={{quote: this.state.quote, routing_options: {breadcrumb_name: `Edit Quote by ${this.state.quote.person.name}`}}} style={{float: "right"}}>
                                 <FontAwesomeIcon icon="edit"/>
+                            </AppLink>
+                            <span style={{float: "right"}}>{'\u00A0'}</span>
+                            <AppLink path="" onClick={this.cancel} style={{float: "right"}}>
+                                <FontAwesomeIcon icon="arrow-left"/>
                             </AppLink>
                         </h2>
                     </div>
@@ -116,6 +128,11 @@ class QuoteShow extends React.Component {
             </div>
         );
     }
+}
+function QuoteShow(props) {
+    var app = useContext(AppContext);
+    var router = useContext(RouterContext);
+    return(<QuoteShowMain {...props} app={app} router={router}/>)
 }
 
 export default QuoteShow;
