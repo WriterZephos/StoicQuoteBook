@@ -1,4 +1,5 @@
 import React from 'react'
+import {BrowserView, MobileView} from 'react-device-detect'
 import QuotesTable from './quotes_table'
 import LoadingView from '../common/loading_view'
 import AppLink from '../common/app_link'
@@ -47,7 +48,12 @@ class QuotesIndex extends React.Component {
                         </small>
                     </h2>
                     <div>Search Form - Under Construction</div>
-                    <QuotesTable quotes={this.state.quotes} setModalAttributes={this.setModalAttributes}/>
+                    <BrowserView>
+                        <QuotesTable quotes={this.state.quotes} setModalAttributes={this.setModalAttributes}/>
+                    </BrowserView>
+                    <MobileView>
+                        <h1> This is rendered only on mobile </h1>
+                    </MobileView>
                 </LoadingView>
             </div>   
         );

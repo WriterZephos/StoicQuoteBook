@@ -1,4 +1,5 @@
 import React from 'react'
+import {BrowserView, MobileView} from 'react-device-detect'
 import PublicationsTable from './publications_table'
 import LoadingView from '../common/loading_view'
 import AppLink from '../common/app_link'
@@ -48,7 +49,12 @@ class PublicationsIndex extends React.Component {
                         </small>
                     </h2>
                     <div>Search Form - Under Construction</div>
-                    <PublicationsTable publications={this.state.publications}/>
+                    <BrowserView>
+                        <PublicationsTable publications={this.state.publications}/>
+                    </BrowserView>
+                    <MobileView>
+                        <h1> This is rendered only on mobile </h1>
+                    </MobileView>
                 </LoadingView>
             </div>
         );
