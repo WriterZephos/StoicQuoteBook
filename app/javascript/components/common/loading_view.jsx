@@ -6,16 +6,21 @@ class LoadingView extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {loading: false};
-        this.setLoading = this.setLoading.bind(this);
+        this.state = {pending_requests: 0};
+        this.startRequest = this.startRequest.bind(this);
+        this.endRequest = this.endRequest.bind(this);
     }
 
-    setLoading(loading){
-        this.setState({loading: loading})
+    startRequest(){
+        this.setState({pending_requests: this.state.pending_requests++});
+    }
+    
+    endRequest(){
+        this.setState({pending_requests: this.state.pending_requests--});
     }
 
     render(){
-        if(this.props.loading){
+        if(this.state.pending_requests > 0){
             return(
                 <div className="row">
                     <div className="col-sm-12 col-md-12 mx-auto" style={{textAlign: "center"}}><FontAwesomeIcon icon="spinner" spin /></div> 
@@ -25,7 +30,8 @@ class LoadingView extends React.Component{
             return(
                 <LoadingContext.Provider 
                 value={{
-                    setLoading: this.setLoading
+                    startRequest: this.startRequest,
+                    endRequest: this.endRequest
                 }}>
                     {this.props.children}
                 </LoadingContext.Provider>

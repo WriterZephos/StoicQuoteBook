@@ -7,6 +7,7 @@ import HomeIndex from './home/home_index'
 import IndexLayout from './layouts/index_layout'
 import NotificationView from './common/notification_view'
 import LoadingView from './common/loading_view'
+import Data from './common/data'
 import PeopleIndex from './people/people_index'
 import PersonShow from './people/person_show'
 import PersonForm from './people/person_form'
@@ -292,9 +293,11 @@ class AppRouter extends React.Component{
                 <IndexLayout>
                     <NotificationView>
                         <LoadingView>
-                            <CSSTransition classNames="app" timeout={300} in={this.state.display} appear> 
-                                {this.renderRoute()}
-                            </CSSTransition>
+                            <Data>
+                                <CSSTransition classNames="app" timeout={300} in={this.state.display} appear> 
+                                    {this.renderRoute()}
+                                </CSSTransition>
+                            </Data>
                         </LoadingView>
                     </NotificationView>
                 </IndexLayout>

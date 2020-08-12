@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { RouterContext, AppContext, LoadingContext, NotificationContext } from '../app_contexts';
+import { RouterContext, AppContext, LoadingContext, NotificationContext, DataContext } from '../app_contexts';
 import AppLink from '../common/app_link'
 
 /*
@@ -20,6 +20,7 @@ class PersonFormMain extends React.Component {
         this.app = props.app;
         this.notification = props.notification;
         this.loading = props.loading;
+        this.data = props.data;
         this.state = {
             person: props.person ? JSON.parse(JSON.stringify(props.person)) : this.getBlankPerson(),
             original_person: props.person ? JSON.parse(JSON.stringify(props.person)) : this.getBlankPerson(),
@@ -38,33 +39,39 @@ class PersonFormMain extends React.Component {
     }
 
     getData(){
-        this.loading.setLoading(true);
         if(this.state.person_id && !this.state.person.id){
-            $.ajax({
-                type: "get",
-                url: `/app/people/${this.state.person_id}`,
-                data: {},
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': this.csrf_token
-                },
-                success: (data) => {
+            this.data.getData(`/app/people/${this.state.person_id}`, 
+                (json) => {
                     this.setState({
-                        person: JSON.parse(JSON.stringify(data.person)), 
-                        original_person: JSON.parse(JSON.stringify(data.person))},
-                        () => {this.loading.setLoading(false);});
+                        person: JSON.parse(JSON.stringify(json)), 
+                        original_person: JSON.parse(JSON.stringify(json))});
                 },
-                error: (data) => {
-                    let notifications = [{message: `An error ocurred. The requested person could not be loaded!`, type: "error"}];
-                    if(data.errors){
-                        data.errors.forEach((error) => {
-                            notifications.push({message: error, type: "error"});
-                        });
-                    }
-                    let notification_options = [{verb: "Back", callback: this.cancel}]
-                    this.notification.setNotifications(notifications, notification_options);
+                (error) => {
+                        let notifications = [{message: `An error occured: ${error.message}`, type: "error"}];
+                        let notification_options = [{verb: "Back", callback: this.cancel}]
+                        this.notification.setNotifications(notifications, notification_options);
                 }
-            });
+            );
+            // $.ajax({
+            //     type: "get",
+            //     url: `/app/people/${this.state.person_id}`,
+            //     data: {},
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'X-CSRF-Token': this.csrf_token
+            //     },
+            //     success: (data) => {
+            //         this.setState({
+            //             person: JSON.parse(JSON.stringify(data.person)), 
+            //             original_person: JSON.parse(JSON.stringify(data.person))},
+            //             () => {this.loading.endRequest();});
+            //     },
+            //     error: (error) => {
+            //         let notifications = [{message: `An error occured: ${error.message}`, type: "error"}];
+            //         let notification_options = [{verb: "Back", callback: this.cancel}]
+            //         this.notification.setNotifications(notifications, notification_options);
+            //     }
+            // });
         }
     }
 
@@ -278,7 +285,8 @@ function PersonForm(props) {
     var router = useContext(RouterContext);
     var loading = useContext(LoadingContext);
     var notification = useContext(NotificationContext);
-    return(<PersonFormMain {...props} app={app} router={router} notification={notification} loading={loading}/>)
+    var data = useContext(DataContext);
+    return(<PersonFormMain {...props} app={app} router={router} notification={notification} loading={loading} data={data}/>)
 }
 
 export default PersonForm
