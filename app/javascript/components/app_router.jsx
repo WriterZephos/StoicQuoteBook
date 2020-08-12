@@ -32,7 +32,7 @@ class AppRouter extends React.Component{
         this.state = {
             current_route: {...this.default_route}, 
             breadcrumbs:[{...this.default_route}],
-            
+            display: true
         };
         
         this.routes = [
@@ -136,41 +136,29 @@ class AppRouter extends React.Component{
         This is the callback that gets called when a new location is pushed to history.
     */
     routing_listener(location, action){
+        // Set display to false.
+        this.setState({display: false}, () => {
+            // Find route configuration.
+            let route = this.get_matching_route(location);
+            
+            // Use default route if no configuration was found.
+            if(!route){
+                route = {...this.default_route};
+            }
 
-        let route = this.get_matching_route(location);
-        
-        if(!route){
-            route = {...this.default_route};
-        }
-
-        this.update_breadcrumbs(route, location, action, () => {
-            let bc_array = this.state.breadcrumbs.map((route) => {
-
-                let routing_options;
-
-                // Get routing options if there are any. 
-                if(route.location && route.location.state && route.location.state.routing_options){
-                    // Routing options passed in state overrided any defaults.
-                    if(route.default_routing_options){
-                        routing_options = {...route.default_routing_options, ...route.location.state.routing_options }
-                    } else {
-                        routing_options = location.state.routing_options;
-                    }
-                } else {
-                    // Could be undefined.
-                    routing_options = route.default_routing_options;
-                }
-
-                if(routing_options && routing_options.breadcrumb_name){
-                    return routing_options.breadcrumb_name;
-                } else {
-                    return route.path;
-                }
+            // Update breadcrumbs, then update the current route.
+            this.update_breadcrumbs(route, location, action, () => {
+                // Log breadcrumbs to console.
+                let bc_array = this.breadcrumbs();
+                console.log(bc_array.join(", "));
+                // Update current route.
+                this.setState({current_route: {...route}, display: true});
             });
-            console.log(bc_array.join(", "));
-            this.setState({current_route: {...route}, });
         });
-        
+    }
+
+    handle_route_change(location, action){
+
     }
 
     /*
@@ -183,30 +171,24 @@ class AppRouter extends React.Component{
         });
     }
 
+    /*
+        Updates the router's breadcrumbs.
+    */
     update_breadcrumbs(route, location, action, callback){
 
+        // Get the last route indexs already in the breadcrumbs.
         let last_index = this.state.breadcrumbs.length - 1;
 
-        // Add the current locations to the index we as saving, so we can reproduce the same view, etc.
+        // Shallow copy route configuration.
         let instance_route = {...route}
+        // Add the current location to the current route, to preserve any custom options, etc.
         instance_route.location = {...location}
 
-        let routing_options;
-        
-        // Get routing options if there are any. 
-        if(location.state && typeof location.state.routing_options === 'object' && location.state.routing_option !== null){
-            // Routing options passed in state overrided any defaults.
-            if(route.default_routing_options){
-                routing_options = {...route.default_routing_options, ...location.state.routing_options }
-            } else {
-                routing_options = location.state.routing_options;
-            }
-        } else {
-            // Could be undefined.
-            routing_options = route.default_routing_options;
-        }
+        let routing_options = this.routing_options_for_route(instance_route);
 
         // Reset the breadcrumbs for main pages (Home, Home > Quotes, etc) where routing options specify to do so.
+        // breadcrumb_index === 0 for root breadcrumb.
+        // breadcrumb_index === 1 for immediate childgren of the default_route.
         if(routing_options && !isNaN(routing_options.breadcrumb_index)){
             if(routing_options.breadcrumb_index === 0){
                 this.setState({breadcrumbs: [{...instance_route}]}, callback);
@@ -218,20 +200,32 @@ class AppRouter extends React.Component{
                     callback();
                 }
             }
-        } else {
+        } 
+        // If breadcrumb_index is not set, the breadcrumbs will be determined relatively based on the action verb.
+        else {
+            // If action is PUSH, it's a new breadcrumb not appended to existing breadcrumbs.
             if(action === "PUSH"){
                 this.setState({breadcrumbs: [...this.state.breadcrumbs, instance_route]}, callback);
-            } else if (action === "POP"){
-                // POP happens on forward and backward browser navigation, 
-                // so we need to see if the current location path (the one getting popped)
-                // is the one we are already on, and handle accordingly.
+            } 
+            // POP happens on forward and backward browser navigation, 
+            // so we need to see if the current location path (the one getting popped)
+            // is the one we are already on, and handle accordingly.
+            else if (action === "POP"){
+                // If the new route is the previous route, it is a back button navigation.
                 if(instance_route.path === this.state.breadcrumbs[last_index - 1].path){
+                    // Remove last route from breadcrumbs.
                     this.setState({breadcrumbs: this.state.breadcrumbs.slice(0,last_index)}, callback);
-                } else {
+                }
+                // Otherwise, it is a forward button navigation.
+                else {
+                    // Append new route to breadcrumbs.
                     this.setState({breadcrumbs: [...this.state.breadcrumbs, instance_route]}, callback);
                 }
-            } else if (action === "REPLACE"){
-                this.setState({breadcrumbs: this.state.breadcrumbs.splice(last_index - 1, 1, {...instance_route})}, callback);
+            } 
+            // POP replaces the current route, so we merely swap out the last breadcrumb.
+            else if (action === "REPLACE"){
+                // Swap current route with new route.
+                this.setState({breadcrumbs: this.state.breadcrumbs.splice(last_index, 1, {...instance_route})}, callback);
             } else {
                 console.error("Breadcrumbs could not be updated. The route may have a problem.");
                 if(callback){
@@ -241,6 +235,40 @@ class AppRouter extends React.Component{
         }
     }
 
+    breadcrumbs(){
+        let bc_array = this.state.breadcrumbs.map((route) => {
+
+            // Get routing options for the route.
+            let routing_options = this.routing_options_for_route(route);
+
+            // If a breadcrumb name is configured, use that. Otherwise, use the path.
+            if(routing_options && routing_options.breadcrumb_name){
+                return routing_options.breadcrumb_name;
+            } else {
+                return route.path;
+            }
+        });
+
+        return bc_array;
+    }
+
+    routing_options_for_route(route){
+        let routing_options;
+
+        // Get routing options if there are any. 
+        if(route.location && route.location.state && route.location.state.routing_options){
+            // Routing options passed in state override any defaults, if they exist.
+            if(route.default_routing_options){
+                routing_options = {...route.default_routing_options, ...route.location.state.routing_options }
+            } else {
+                routing_options = location.state.routing_options;
+            }
+        } else {
+            // Could be undefined.
+            routing_options = route.default_routing_options;
+        }
+        return routing_options;
+    }
 
     /*
         The component for a route is rendered with the given props:
@@ -264,7 +292,7 @@ class AppRouter extends React.Component{
                     go: this.go
                 }}>
                 <IndexLayout>
-                    <CSSTransition classNames="app" timeout={3000} appear={true}> 
+                    <CSSTransition classNames="app" timeout={300} in={this.state.display} appear> 
                         {this.render_route()}
                     </CSSTransition>
                 </IndexLayout>
