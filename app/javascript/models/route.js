@@ -14,7 +14,7 @@ class Route{
         return matches && matches.length > 0;
     }
 
-    routeOptions(){
+    getRouteOptions(){
         let routing_options;
 
         // Get routing options if there are any. 
@@ -43,8 +43,8 @@ class Route{
             {...QueryString.parse(this.location.search), ...this.location.state} : {}
     }
 
-    breadCrumb(){
-        let route_options = this.routeOptions();
+    getBreadCrumb(){
+        let route_options = this.getRouteOptions();
 
         // If a breadcrumb name is configured, use that. Otherwise, use the path.
         if(route_options && route_options.breadcrumb_name){

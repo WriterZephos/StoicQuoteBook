@@ -3,6 +3,7 @@ import { createBrowserHistory } from 'history'
 import { CSSTransition } from "react-transition-group";
 import { RouterContext } from './app_contexts';
 import RouteList from '../models/route_list'
+import SiteMap from '../models/site_map'
 import IndexLayout from './layouts/index_layout'
 import NotificationView from './common/notification_view'
 import LoadingView from './common/loading_view'
@@ -16,6 +17,7 @@ class AppRouter extends React.Component{
         this.app_history = createBrowserHistory();
         this.history_unlisten = this.app_history.listen(this.routingListener.bind(this));
         this.route_list = new RouteList();
+        this.site_map = new SiteMap(this.route_list);
 
         let default_route = this.route_list.getDefaultRoute();
 
@@ -74,14 +76,9 @@ class AppRouter extends React.Component{
         this.setState({display: false}, () => {
             // Find route configuration.
             let route = this.prepareCurrentRoute(location)
+            this.site_map.updateCurrentBranch(route);
             this.setState({current_route: route, display: true});
-
-            // Update breadcrumbs, then update the current route.
-            this.updateBreadcrumbs(route, action, () => {
-                // Log breadcrumbs to console.
-                let bc_array = this.breadcrumbs();
-                console.log(bc_array.join(", "));
-            });
+            console.log(this.site_map.getBreadCrumbs().join(", "));
         });
     }
 
@@ -90,69 +87,6 @@ class AppRouter extends React.Component{
         // Add the current location to the current route, to preserve any custom options, etc.
         route.location = {...location}
         return route;
-    }
-
-    /*
-        Updates the router's breadcrumbs.
-    */
-    updateBreadcrumbs(route, action, callback){
-
-        // Get the last route indexs already in the breadcrumbs.
-        let last_index = this.state.breadcrumbs.length - 1;
-        let routing_options = route.routeOptions();
-
-        // Reset the breadcrumbs for main pages (Home, Home > Quotes, etc) where routing options specify to do so.
-        // breadcrumb_index === 0 for root breadcrumb.
-        // breadcrumb_index === 1 for immediate childgren of the default_route.
-        if(routing_options && !isNaN(routing_options.breadcrumb_index)){
-            if(routing_options.breadcrumb_index === 0){
-                this.setState({breadcrumbs: [route]}, callback);
-            } else if (routing_options.breadcrumb_index === 1){
-                this.setState({breadcrumbs: [this.route_list.getDefaultRoute(), route]}, callback);
-            } else {
-                console.error("Breadcrumbs could not be updated. The route may have a problem.");
-                if(callback){
-                    callback();
-                }
-            }
-        } 
-        // If breadcrumb_index is not set, the breadcrumbs will be determined relatively based on the action verb.
-        else {
-            // If action is PUSH, it's a new breadcrumb not appended to existing breadcrumbs.
-            if(action === "PUSH"){
-                this.setState({breadcrumbs: [...this.state.breadcrumbs, route]}, callback);
-            } 
-            // POP happens on forward and backward browser navigation, 
-            // so we need to see if the current location path (the one getting popped)
-            // is the one we are already on, and handle accordingly.
-            else if (action === "POP"){
-                // If the new route is the previous route, it is a back button navigation.
-                if(route.path === this.state.breadcrumbs[last_index - 1].path){
-                    // Remove last route from breadcrumbs.
-                    this.setState({breadcrumbs: this.state.breadcrumbs.slice(0,last_index)}, callback);
-                }
-                // Otherwise, it is a forward button navigation.
-                else {
-                    // Append new route to breadcrumbs.
-                    this.setState({breadcrumbs: [...this.state.breadcrumbs, route]}, callback);
-                }
-            } 
-            // POP replaces the current route, so we merely swap out the last breadcrumb.
-            else if (action === "REPLACE"){
-                // Swap current route with new route.
-                this.setState({breadcrumbs: this.state.breadcrumbs.splice(last_index, 1, route)}, callback);
-            } else {
-                console.error("Breadcrumbs could not be updated. The route may have a problem.");
-                if(callback){
-                    callback();
-                }
-            }
-        }
-    }
-
-    breadcrumbs(){
-        let bc_array = this.state.breadcrumbs.map((route) => { return route.breadCrumb(); });
-        return bc_array;
     }
 
     render(){

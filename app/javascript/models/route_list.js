@@ -13,7 +13,8 @@ import PublicationForm from '../components/publications/publication_form'
 const DEFAULT_ROUTE = new Route({
     path: '/',
     regex: /^\/$/,
-    default_routing_options: {breadcrumb_index: 0, breadcrumb_name: (props) => { return "Home" } },
+    default_routing_options: { 
+        breadcrumb_name: (props) => { return "Home" } },
     view: HomeIndex
 });
 
@@ -22,7 +23,10 @@ const ROUTES = [
     new Route({
         path: '/quotes',
         regex: /^\/quotes$/g,
-        default_routing_options: {breadcrumb_index: 1, breadcrumb_name: (props) => { return "Quotes" }},
+        default_routing_options: { 
+            breadcrumb_name: (props) => { return "Quotes" },
+            parent: "/"
+        },
         view: QuotesIndex
     }),
     new Route({
@@ -30,55 +34,78 @@ const ROUTES = [
         regex: /^\/quote$/g,
         default_routing_options: {
             breadcrumb_name: (props) => { return "Quote" }, 
-            parent: "/quote"},
+            parent: "/quotes"},
         view: QuoteShow
     }),
     new Route({
         path: '/quote_form',
         regex: /^\/quote_form$/g,
-        default_routing_options: {breadcrumb_name: (props) => { return "Quote Form" }},
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "Quote Form" }, 
+            parent: "/quote"},
         view: QuoteForm
     }),
     new Route({
         path: '/people',
         regex: /^\/people$/g,
-        default_routing_options: {breadcrumb_index: 1, breadcrumb_name: (props) => { return "People" }},
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "People" },
+            parent: "/"
+        },
         view: PeopleIndex
     }),
     new Route({
         path: '/person',
         regex: /^\/person$/g,
-        default_routing_options: {breadcrumb_name: (props) => { return "Person" } },
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "Person" },
+            parent: "/people"
+        },
         view: PersonShow
     }),
     new Route({
         path: '/new_person',
         regex: /^\/new_person$/g,
-        default_routing_options: {breadcrumb_name: (props) => { return "New Person" } },
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "New Person" },
+            parent: "/people"
+        },
         view: PersonForm
     }),
     new Route({
         path: '/edit_person',
         regex: /^\/edit_person$/g,
-        default_routing_options: {breadcrumb_name: (props) => { return "Edit Person" } },
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "Edit Person" },
+            parent: "/person"
+        },
         view: PersonForm
     }),
     new Route({
         path: '/publications',
         regex: /^\/publications$/g,
-        default_routing_options: {breadcrumb_index: 1, breadcrumb_name: (props) => { return "Publications" } },
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "Publications" },
+            parent: "/"
+        },
         view: PublicationsIndex
     }),
     new Route({
         path: '/publication',
         regex: /^\/publication$/g,
-        default_routing_options: {breadcrumb_name: (props) => { return "Publication" } },
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "Publication" },
+            parent: "/publications"
+        },
         view: PublicationShow
     }),
     new Route({
         path: '/publication_form',
         regex: /^\/publication_form$/g,
-        default_routing_options: {breadcrumb_name: (props) => { return "Publication Form" } },
+        default_routing_options: {
+            breadcrumb_name: (props) => { return "Publication Form" },
+            parent: "/publication"
+        },
         view: PublicationForm
     })
 ];
