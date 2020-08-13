@@ -176,7 +176,7 @@ class AppRouter extends React.Component{
     renderRoute(){
         let props = QueryString.parse(this.app_history.location.search);
         props = {...props, ...this.app_history.location.state}
-        return this.state.current_route.action(props);
+        return this.state.current_route.render(props);
     }
 
     render(){

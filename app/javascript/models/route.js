@@ -3,7 +3,7 @@ class Route{
         this.path = params.path;
         this.regex = params.regex;
         this.default_routing_options = params.default_routing_options;
-        this.action = params.action;
+        this.render = params.render;
     }
 
     matchPath(path){
