@@ -1,6 +1,5 @@
 import React from 'react'
 import AppLink from '../common/app_link'
-import FadeIn from 'react-fade-in'
 
 class PeopleTable extends React.Component {
 
@@ -23,7 +22,7 @@ class PeopleTable extends React.Component {
                         <AppLink
                             path={`/person?id=${p.id}`}
                             text={p.name}
-                            state={{routing_options: {breadcrumb_name: `Person: ${p.name}`}}}/>
+                            state={{person: p, routing_options: {breadcrumb_name: `Person: ${p.name}`}}}/>
                     </td>
                     <td>{p.description}</td>
                     <td>{p.wikipedia_link}</td>
@@ -54,7 +53,6 @@ class PeopleTable extends React.Component {
             <div>{content}</div>
         )
     }
-
 }
 
 export default PeopleTable
