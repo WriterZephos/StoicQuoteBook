@@ -49,7 +49,7 @@ class PeopleIndexMain extends React.Component {
                 <h2>
                     People{'\u00A0'}
                     <small>
-                        <AppLink path={"/person_form"} state={{routing_options: {breadcrumb_name: `New Person`}}}>
+                        <AppLink path={"/new_person"}>
                             <FontAwesomeIcon icon="plus-circle"/>
                         </AppLink>
                     </small>

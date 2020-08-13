@@ -60,7 +60,7 @@ class PersonShowMain extends React.Component {
                     <div className="col-sm-12 col-md-12 mx-auto">
                         <h2>
                             {this.state.person.name}{'\u00A0'}
-                            <AppLink path={"/person_form"} state={{person: this.state.person, routing_options: {breadcrumb_name: `Edit ${this.state.person.name}`}}} style={{float: "right"}}>
+                            <AppLink path={"/edit_person"} state={{person: this.state.person, routing_options: {breadcrumb_name: `Edit ${this.state.person.name}`}}} style={{float: "right"}}>
                                 <FontAwesomeIcon icon="edit"/>
                             </AppLink>
                             <span style={{float: "right"}}>{'\u00A0'}</span>

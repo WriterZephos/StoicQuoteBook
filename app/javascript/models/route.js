@@ -1,9 +1,11 @@
+import React from 'react'
+
 class Route{
     constructor(params){
         this.path = params.path;
         this.regex = params.regex;
         this.default_routing_options = params.default_routing_options;
-        this.render = params.render;
+        this.view = params.view;
     }
 
     matchPath(path){
@@ -27,6 +29,26 @@ class Route{
             routing_options = this.default_routing_options;
         }
         return routing_options;
+    }
+
+    /*
+        The component for a route is rendered with the given props:
+
+        1. Query string props.
+        2. State from history.location.state.
+    */
+    getProps(){
+        let props = QueryString.parse(this.location.search);
+        props = {...props, ...this.location.state};
+        return props;
+    }
+
+    // Get the view for the route and render it with the appropriate props.
+    // This is a little bit of indirection, and the view will be some React compoonent
+    // as configured by the Route.
+    render(){
+        const DynamicComponent = this.view;
+        return <DynamicComponent {...this.getProps}/>
     }
 }
 

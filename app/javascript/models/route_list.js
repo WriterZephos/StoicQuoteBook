@@ -1,4 +1,3 @@
-import React from 'react'
 import Route from './route'
 import HomeIndex from '../components/home/home_index'
 import PeopleIndex from '../components/people/people_index'
@@ -15,7 +14,7 @@ const DEFAULT_ROUTE = new Route({
     path: '/',
     regex: /^\/$/,
     default_routing_options: {breadcrumb_index: 0, breadcrumb_name: "Home"},
-    render: (props) => <HomeIndex {...props}/>
+    view: HomeIndex
 });
 
 const ROUTES = [
@@ -24,55 +23,61 @@ const ROUTES = [
         path: '/quotes',
         regex: /^\/quotes$/g,
         default_routing_options: {breadcrumb_index: 1, breadcrumb_name: "Quotes"},
-        render: (props) => <QuotesIndex {...props}/>
+        view: QuotesIndex
     }),
     new Route({
         path: '/quote',
         regex: /^\/quote$/g,
         default_routing_options: {breadcrumb_name: "Quote", parent: "/quote"},
-        render: (props) => <QuoteShow {...props}/>
+        view: QuoteShow
     }),
     new Route({
         path: '/quote_form',
         regex: /^\/quote_form$/g,
         default_routing_options: {breadcrumb_name: "Quote Form"},
-        render: (props) => <QuoteForm {...props}/>
+        view: QuoteForm
     }),
     new Route({
         path: '/people',
         regex: /^\/people$/g,
         default_routing_options: {breadcrumb_index: 1, breadcrumb_name: "People"},
-        render: (props) => <PeopleIndex {...props}/>
+        view: PeopleIndex
     }),
     new Route({
         path: '/person',
         regex: /^\/person$/g,
         default_routing_options: {breadcrumb_name: "Person"},
-        render: (props) => <PersonShow {...props}/>
+        view: PersonShow
     }),
     new Route({
-        path: '/person_form',
-        regex: /^\/person_form$/g,
-        default_routing_options: {breadcrumb_name: "Person Form"},
-        render: (props) => <PersonForm {...props}/>
+        path: '/new_person',
+        regex: /^\/new_person$/g,
+        default_routing_options: {breadcrumb_name: "New Person"},
+        view: PersonForm
+    }),
+    new Route({
+        path: '/edit_person',
+        regex: /^\/edit_person$/g,
+        default_routing_options: {breadcrumb_name: "Edit Person"},
+        view: PersonForm
     }),
     new Route({
         path: '/publications',
         regex: /^\/publications$/g,
         default_routing_options: {breadcrumb_index: 1, breadcrumb_name: "Publications"},
-        render: (props) => <PublicationsIndex {...props}/>
+        view: PublicationsIndex
     }),
     new Route({
         path: '/publication',
         regex: /^\/publication$/g,
         default_routing_options: {breadcrumb_name: "Publication"},
-        render: (props) => <PublicationShow {...props}/>
+        view: PublicationShow
     }),
     new Route({
         path: '/publication_form',
         regex: /^\/publication_form$/g,
         default_routing_options: {breadcrumb_name: "Publication Form"},
-        render: (props) => <PublicationForm {...props}/>
+        view: PublicationForm
     })
 ];
 

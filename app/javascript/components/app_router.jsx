@@ -75,9 +75,11 @@ class AppRouter extends React.Component{
         this.setState({display: false}, () => {
             // Find route configuration.
             let route = this.route_list.getMatchingOrDefaultRoute(location.pathname);
+            // Add the current location to the current route, to preserve any custom options, etc.
+            route.location = {...location}
 
             // Update breadcrumbs, then update the current route.
-            this.updateBreadcrumbs(route, location, action, () => {
+            this.updateBreadcrumbs(route, action, () => {
                 // Log breadcrumbs to console.
                 let bc_array = this.breadcrumbs();
                 console.log(bc_array.join(", "));
@@ -87,18 +89,13 @@ class AppRouter extends React.Component{
         });
     }
 
-
-
     /*
         Updates the router's breadcrumbs.
     */
-    updateBreadcrumbs(route, location, action, callback){
+    updateBreadcrumbs(route, action, callback){
 
         // Get the last route indexs already in the breadcrumbs.
         let last_index = this.state.breadcrumbs.length - 1;
-
-        // Add the current location to the current route, to preserve any custom options, etc.
-        route.location = {...location}
         let routing_options = route.routeOptions();
 
         // Reset the breadcrumbs for main pages (Home, Home > Quotes, etc) where routing options specify to do so.
@@ -167,18 +164,6 @@ class AppRouter extends React.Component{
         return bc_array;
     }
 
-    /*
-        The component for a route is rendered with the given props:
-
-        1. Query string props.
-        2. State from history.location.state.
-    */
-    renderRoute(){
-        let props = QueryString.parse(this.app_history.location.search);
-        props = {...props, ...this.app_history.location.state}
-        return this.state.current_route.render(props);
-    }
-
     render(){
         return (
             <RouterContext.Provider 
@@ -193,7 +178,7 @@ class AppRouter extends React.Component{
                         <LoadingView>
                             <Data>
                                 <CSSTransition classNames="app" timeout={300} in={this.state.display} appear> 
-                                    {this.renderRoute()}
+                                    {this.state.current_route.render()}
                                 </CSSTransition>
                             </Data>
                         </LoadingView>
