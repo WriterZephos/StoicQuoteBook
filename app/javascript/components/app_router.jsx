@@ -1,5 +1,4 @@
 import React from 'react'
-import QueryString from 'query-string'
 import { createBrowserHistory } from 'history'
 import { CSSTransition } from "react-transition-group";
 import { RouterContext } from './app_contexts';
@@ -26,7 +25,7 @@ class AppRouter extends React.Component{
             display: true
         };
         
-        this.state.current_route = this.route_list.getMatchingOrDefaultRoute(this.app_history.location.pathname);
+        this.state.current_route = this.prepareCurrentRoute(this.app_history.location);
 
         this.routeFromLink = this.routeFromLink.bind(this);
         this.route = this.route.bind(this);
@@ -74,19 +73,23 @@ class AppRouter extends React.Component{
         // Set display to false.
         this.setState({display: false}, () => {
             // Find route configuration.
-            let route = this.route_list.getMatchingOrDefaultRoute(location.pathname);
-            // Add the current location to the current route, to preserve any custom options, etc.
-            route.location = {...location}
+            let route = this.prepareCurrentRoute(location)
+            this.setState({current_route: route, display: true});
 
             // Update breadcrumbs, then update the current route.
             this.updateBreadcrumbs(route, action, () => {
                 // Log breadcrumbs to console.
                 let bc_array = this.breadcrumbs();
                 console.log(bc_array.join(", "));
-                // Update current route.
-                this.setState({current_route: route, display: true});
             });
         });
+    }
+
+    prepareCurrentRoute(location){
+        let route = this.route_list.getMatchingOrDefaultRoute(location.pathname);
+        // Add the current location to the current route, to preserve any custom options, etc.
+        route.location = {...location}
+        return route;
     }
 
     /*
@@ -148,19 +151,7 @@ class AppRouter extends React.Component{
     }
 
     breadcrumbs(){
-        let bc_array = this.state.breadcrumbs.map((route) => {
-
-            // Get routing options for the route.
-            let routing_options = route.routeOptions();
-
-            // If a breadcrumb name is configured, use that. Otherwise, use the path.
-            if(routing_options && routing_options.breadcrumb_name){
-                return routing_options.breadcrumb_name;
-            } else {
-                return route.path;
-            }
-        });
-
+        let bc_array = this.state.breadcrumbs.map((route) => { return route.breadCrumb(); });
         return bc_array;
     }
 

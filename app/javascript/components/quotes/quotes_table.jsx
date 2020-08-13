@@ -16,9 +16,9 @@ class QuotesTable extends React.Component {
                 <tr key={q.id}>
                     <td>
                         <AppLink
-                                path={"/quote"}
+                                path={`/quote?id=${q.id}`}
                                 text={q.quote_texts_attributes[0].text}
-                                state={{quote: q, routing_options: {breadcrumb_name: `Quote by ${q.person.name}`}}}/>
+                                state={{quote: q}}/>
                     </td>
                     <td>{q.formatted_citation}</td>
                     <td>{q.key_words}</td>

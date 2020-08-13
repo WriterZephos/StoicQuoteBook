@@ -43,7 +43,7 @@ class PublicationsIndex extends React.Component {
                     <h2>
                         Publications{'\u00A0'}
                         <small>
-                            <AppLink path={"/publication_form"} state={{routing_options: {breadcrumb_name: `New Publication`}}}>
+                            <AppLink path={"/publication_form"}>
                                 <FontAwesomeIcon icon="plus-circle"/>
                             </AppLink>
                         </small>

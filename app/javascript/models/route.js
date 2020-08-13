@@ -1,4 +1,5 @@
 import React from 'react'
+import QueryString from 'query-string'
 
 class Route{
     constructor(params){
@@ -38,9 +39,19 @@ class Route{
         2. State from history.location.state.
     */
     getProps(){
-        let props = QueryString.parse(this.location.search);
-        props = {...props, ...this.location.state};
-        return props;
+        return this.location ? 
+            {...QueryString.parse(this.location.search), ...this.location.state} : {}
+    }
+
+    breadCrumb(){
+        let route_options = this.routeOptions();
+
+        // If a breadcrumb name is configured, use that. Otherwise, use the path.
+        if(route_options && route_options.breadcrumb_name){
+            return route_options.breadcrumb_name(this.getProps());
+        } else {
+            return route.path;
+        }
     }
 
     // Get the view for the route and render it with the appropriate props.
@@ -48,7 +59,7 @@ class Route{
     // as configured by the Route.
     render(){
         const DynamicComponent = this.view;
-        return <DynamicComponent {...this.getProps}/>
+        return <DynamicComponent {...this.getProps()}/>
     }
 }
 
